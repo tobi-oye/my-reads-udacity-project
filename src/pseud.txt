@@ -1,0 +1,40 @@
+*********PSEUDO CODE / ALGORITHM - FOR MY READS APP**********
+algorithm 
+click on book
+choose from dropdown where to add book
+add book to option specified by drop down 
+chosen option (book shelve) should update based on option chosen
+former bookshelve should not have book again
+
+
+
+pseudocode
+
+
+onClick of any of the options in the drop down
+    options - currently reading
+            - want to read
+            - read 
+            - none
+    call moveBook function
+
+movebook function
+    if option == currently reading
+        grab the book element
+        remove book element from current book shelve
+            querySelectorAll elements in current book shelve
+            filter array of elements in current book shelve to remove book
+            querySelectorAll all elements in selected option (currently reading) 
+            append element to currently reading book shelve
+    else if option == want to read
+        grab the book element
+        remove book element from current book shelve
+            filter array of elements in current book shelve to remove book
+            append element to currently reading book shelve
+    if option == read
+        grab the book element
+        remove book element from current book shelve
+            filter array of elements in current book shelve to remove book
+            append element to read book shelve
+
+
