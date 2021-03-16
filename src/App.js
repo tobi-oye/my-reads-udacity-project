@@ -42,14 +42,11 @@ class BooksApp extends React.Component {
    */
   moveBook = (bookShelf, e, book) => {
     let value = e.target.value;
-    //  console.log(bookShelf.id,e.target.value,book.id)
-    // debugger
+
     this.removeBook(book, bookShelf, value);
-    // debugger
+
     this.addBook(value, book);
     this.updateBook(book, value);
-    console.log(this.updateBook(book, value));
-    console.log(book.id, value);
   };
 
   /**
@@ -57,7 +54,6 @@ class BooksApp extends React.Component {
    * it will accept the bookid and shelve name as arguement
    */
   updateBook(bookId, shelveName) {
-    // debugger
     return BooksAPI.update(bookId, shelveName);
   }
   addBook(value, newElem) {
@@ -94,13 +90,11 @@ class BooksApp extends React.Component {
    * @param {objet for the selected options from each book} value
    */
   removeBook(singleElem, bigElem, value) {
-    // debugger
     if (bigElem.id === "currentlyReading" && value !== "none") {
       return this.setState((previousState) => {
         let bookShelves = Object.assign({}, previousState.bookShelves);
         bookShelves.currentlyReading.books = previousState.bookShelves.currentlyReading.books.filter(
           (elem) => {
-            // console.log(elem.id,singleElem.id);
             return elem.id !== singleElem.id;
           }
         );
@@ -111,7 +105,6 @@ class BooksApp extends React.Component {
         let bookShelves = Object.assign({}, previousState.bookShelves);
         bookShelves.wantToRead.books = previousState.bookShelves.wantToRead.books.filter(
           (elem) => {
-            // console.log(elem.id,singleElem.id);
             return elem.id !== singleElem.id;
           }
         );
@@ -122,7 +115,6 @@ class BooksApp extends React.Component {
         let bookShelves = Object.assign({}, previousState.bookShelves);
         bookShelves.read.books = previousState.bookShelves.read.books.filter(
           (elem) => {
-            // console.log(elem.id,singleElem.id);
             return elem.id !== singleElem.id;
           }
         );
@@ -133,29 +125,44 @@ class BooksApp extends React.Component {
 
   componentDidMount() {
     BooksAPI.getAll().then((res) => {
-      return this.setState({
+      return this.setState(() => ({
         allBooks: res,
         bookShelves: {
           currentlyReading: {
             shelveName: "Currently Reading",
-            books: res.slice(0, 2),
+            books: [
+              ...new Set(
+                res.filter(
+                  (bookValue) => bookValue.shelf === "currentlyReading"
+                )
+              ),
+            ],
             id: "currentlyReading",
           },
           wantToRead: {
             shelveName: "Want to Read",
-            books: res.slice(2, 4),
+            books: [
+              ...new Set(
+                res.filter((bookValue) => bookValue.shelf === "wantToRead")
+              ),
+            ],
             id: "wantToRead",
           },
-          read: { shelveName: "Read", books: res.slice(4, 7), id: "read" },
+          read: {
+            shelveName: "Read",
+            books: [
+              ...new Set(res.filter((bookValue) => bookValue.shelf === "read")),
+            ],
+            id: "read",
+          },
         },
-      });
+      }));
     });
   }
 
   render() {
     const { bookShelves, options } = this.state;
-    //  console.log(this.state.wantToRead)
-    // console.log(bookShelves.wantToRead.books);
+
     return (
       <div className="app">
         <Route
@@ -164,7 +171,7 @@ class BooksApp extends React.Component {
             return (
               <SearchPage
                 options={options}
-                showMainPage={this.showMainPage}
+                bookShelves={bookShelves}
                 moveBook={this.moveBook}
               />
             );
@@ -177,7 +184,7 @@ class BooksApp extends React.Component {
             return (
               <div>
                 <MainPage
-                  bookShelves={bookShelves}
+                  bookShelves={this.state.bookShelves}
                   options={options}
                   moveBook={this.moveBook}
                 />
