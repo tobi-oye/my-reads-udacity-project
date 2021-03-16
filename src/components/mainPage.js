@@ -10,15 +10,15 @@ class MainPage extends Component {
         </div>
         <div className="list-books-content">
           <div>
-            {Object.values(this.props.bookShelves).map((book) => {
+            {Object.values(this.props.bookShelves).map((book, index) => {
               return (
-                <div className="bookshelf">
+                <div className="bookshelf" key={index}>
                   <h2 className="bookshelf-title">{book.shelveName}</h2>
                   <div className="bookshelf-books">
                     <ol className="books-grid">
-                      {book.books.map((img) => {
+                      {book.books.map((img, index) => {
                         return (
-                          <li>
+                          <li key={index}>
                             <div className="book">
                               <div className="book-top">
                                 <div
