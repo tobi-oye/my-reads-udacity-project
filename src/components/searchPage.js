@@ -6,6 +6,7 @@ class SearchPage extends Component {
   state = {
     query: "",
     searchResult: [],
+    defaultValue: "none",
   };
   updateQuerry = (event) => {
     this.setState({ query: event });
@@ -13,18 +14,57 @@ class SearchPage extends Component {
 
   search(query) {
     BooksAPI.search(query)
-      .then((res) => {
-        if (res.error) {
+      .then((resp) => {
+        if (resp.error) {
           this.setState({ searchResult: [] });
         } else {
-          return this.setState({ searchResult: res });
+          this.setState({ searchResult: resp });
         }
       })
-      .catch(console.log("err"));
+      .catch();
+  }
+
+  bookCheck(currentlyReading, wantToRead, read, searchElement) {
+    if (
+      this.props.bookShelves[`${currentlyReading}`] &&
+      this.props.bookShelves[`${wantToRead}`] &&
+      this.props.bookShelves[`${read}`]
+    ) {
+      const currentReadingFilteredResult = this.props.bookShelves[
+        `${currentlyReading}`
+      ].books.filter((bookValue) => bookValue.id === searchElement.id);
+
+      const wantToReadFilteredResult = this.props.bookShelves[
+        `${wantToRead}`
+      ].books.filter((bookValue) => bookValue.id === searchElement.id);
+
+      const readFilteredResult = this.props.bookShelves[`${read}`].books.filter(
+        (bookValue) => bookValue.id === searchElement.id
+      );
+
+      if (currentReadingFilteredResult.length) {
+        currentReadingFilteredResult.map(
+          (currentReadingResult) =>
+            (currentReadingResult.shelf = "currentlyReading")
+        );
+        return "currentlyReading";
+      } else if (wantToReadFilteredResult.length) {
+        wantToReadFilteredResult.map(
+          (wanttReadResult) => (wanttReadResult.shelf = "wantToRead")
+        );
+        return "wantToRead";
+      } else if (readFilteredResult.length) {
+        readFilteredResult.map((readResult) => (readResult.shelf = "read"));
+        return "read";
+      } else {
+        return "none";
+      }
+    }
   }
 
   render() {
     const { searchResult, query } = this.state;
+
     return (
       <div>
         <div className="search-books">
@@ -33,14 +73,6 @@ class SearchPage extends Component {
               Close
             </Link>
             <div className="search-books-input-wrapper">
-              {/*
-              NOTES: The search from BooksAPI is limited to a particular set of search terms.
-              You can find these search terms here:
-              https://github.com/udacity/reactnd-project-myreads-starter/blob/master/SEARCH_TERMS.md
-
-              However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
-              you don't find a specific author or title. Every search is limited by search terms.
-            */}
               <input
                 type="text"
                 placeholder="Search by title or author"
@@ -57,9 +89,9 @@ class SearchPage extends Component {
           <div className="search-books-results">
             <ol className="books-grid">
               {this.props.searchResult !== [] ? (
-                searchResult.map((searchElem) => {
+                searchResult.map((searchElement, index) => {
                   return (
-                    <li>
+                    <li key={index}>
                       <div className="book">
                         <div className="book-top">
                           <div
@@ -68,8 +100,8 @@ class SearchPage extends Component {
                               width: 128,
                               height: 193,
                               backgroundImage: `url(${
-                                searchElem.imageLinks
-                                  ? searchElem.imageLinks.smallThumbnail
+                                searchElement.imageLinks
+                                  ? searchElement.imageLinks.smallThumbnail
                                   : ``
                               })`,
                             }}
@@ -78,9 +110,18 @@ class SearchPage extends Component {
                           <div className="book-shelf-changer">
                             <select
                               onChange={(e) => {
-                                return this.props.moveBook([], e, searchElem);
+                                return this.props.moveBook(
+                                  [],
+                                  e,
+                                  searchElement
+                                );
                               }}
-                              defaultValue="none"
+                              defaultValue={this.bookCheck(
+                                "currentlyReading",
+                                "wantToRead",
+                                "read",
+                                searchElement
+                              )}
                             >
                               <option value="move" disabled>
                                 Move to...
@@ -96,9 +137,11 @@ class SearchPage extends Component {
                             </select>
                           </div>
                         </div>
-                        <div className="book-title">{searchElem.title}</div>
+                        <div className="book-title">{searchElement.title}</div>
                         <div className="book-authors">
-                          {searchElem.authors ? searchElem.authors[0] : ``}
+                          {searchElement.authors
+                            ? searchElement.authors[0]
+                            : ``}
                         </div>
                       </div>
                     </li>
